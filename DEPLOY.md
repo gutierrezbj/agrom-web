@@ -8,8 +8,8 @@ Convención **SRS** (Cuaderno Base de Proyectos + Catálogo de Infraestructura, 
 | Offset SRS | **+180** |
 | Frontend (interno) | `127.0.0.1:3180` → container nginx:alpine |
 | Dominio | `agrom.es` (raíz + `www`) |
-| VPS PROD | `72.62.41.234` (Hostinger · Ubuntu 24.04 · Nginx 1.24) |
-| VPS STAGING | `187.77.71.102` (opcional para landings estáticas) |
+| Servidor 1 | `72.62.41.234` (Hostinger · Ubuntu 24.04 · Nginx 1.24) — donde está desplegado agrom-web |
+| Servidor 2 | `187.77.71.102` (Hostinger · Ubuntu 22.04) — otra opción de despliegue SRS |
 | Path en servidor | `/opt/apps/agrom-web/` |
 | Reverse proxy | Nginx host externo (en VPS) |
 | SSL | Certbot + Let's Encrypt (auto-renew) |
@@ -21,7 +21,7 @@ Convención **SRS** (Cuaderno Base de Proyectos + Catálogo de Infraestructura, 
 
 Antes del primer deploy, **registrar `agrom-web` en el Catálogo de Infraestructura SRS** (Notion `3217981f08ef81828e31edfcc9b78414`):
 
-- **Sec. 2 (Catálogo de Proyectos)**: `AgroWeb · 1 container · Nginx Alpine · 3180 · agrom.es · PROD`
+- **Sec. 2 (Catálogo de Proyectos)**: `AgroWeb · agrom-web · Nginx Alpine · 3180 · agrom.es · Servidor 1`
 - **Sec. 4 (Convención de Puertos)**: `AgroWeb · +180 · 3180 · — · — · —`
 - Actualizar "Siguiente offset libre" a **+190**
 
@@ -48,7 +48,7 @@ dig +short www.agrom.es
 
 ---
 
-## 2 · Deploy en PROD (`72.62.41.234`)
+## 2 · Deploy en Servidor 1 (`72.62.41.234`)
 
 ```bash
 ssh root@72.62.41.234
@@ -124,7 +124,7 @@ Renovación: cron de Certbot ya configurado en el VPS (`systemctl status certbot
 
 ## 5 · Registrar en monitorización
 
-Editar `/opt/scripts/healthcheck.sh` en el VPS PROD y añadir al array `SERVICES`:
+Editar `/opt/scripts/healthcheck.sh` en el Servidor 1 y añadir al array `SERVICES`:
 
 ```bash
 "AgroWeb|agrom-web|docker"
@@ -190,9 +190,9 @@ docker compose restart
 
 ---
 
-## 9 · Staging opcional (`187.77.71.102`)
+## 9 · Alternativa: deploy en Servidor 2 (`187.77.71.102`)
 
-Para validar antes de PROD, repite §2 en STAGING. El offset +180 es el mismo en ambos servidores — no choca porque cada VPS tiene su propio espacio de puertos.
+Ambos servidores SRS están en producción. agrom-web está en Servidor 1. Si en el futuro se mueve o duplica a Servidor 2, repetir §2 cambiando la IP. El offset +180 es el mismo en ambos — no choca porque cada VPS tiene su propio espacio de puertos.
 
 ---
 

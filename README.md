@@ -44,7 +44,7 @@ Sin `package.json`. Sin Node. Sin build. El container monta los HTML/assets como
 
 ## Deploy — convención SRS
 
-Infraestructura propia: VPS Hostinger `72.62.41.234` + Nginx reverse-proxy + Docker compose + Certbot. Offset SRS asignado: **+180** (container expuesto en `127.0.0.1:3180`).
+Infraestructura propia SRS: Servidor 1 (`72.62.41.234`, Hostinger) + Nginx reverse-proxy + Docker compose + Certbot. Offset SRS asignado: **+180** (container expuesto en `127.0.0.1:3180`).
 
 Receta completa paso a paso en [DEPLOY.md](DEPLOY.md). Resumen:
 
