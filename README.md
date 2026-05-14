@@ -93,7 +93,7 @@ Antes de tocar copy: revisar el spec v2 en Notion y la memoria `CRITICAL_no_inve
 |---|---|---|
 | `--primary` | `#46632e` | Verde principal (CTAs, eyebrow) |
 | `--primary-dark` | `#354b23` | Hover |
-| `--surface` | `#fdf8f0` | Fondo body |
+| `--surface` | `#f3f5ee` | Fondo body |
 | `--surface-elevated` | `#f5e6cc` | Fondo cards |
 | `--border` | `#d4a85a` | Hairlines |
 | `--text-strong` | `#18230f` | Texto principal |
@@ -113,7 +113,7 @@ Antes de tocar copy: revisar el spec v2 en Notion y la memoria `CRITICAL_no_inve
 ## TODOs visibles
 
 - [ ] Validar empíricamente `30+ ha/jornada` tras las primeras 5 jornadas reales. Si la media operativa < 30, ajustar a `Hasta 30 ha/jornada según cultivo`.
-- [ ] Sustituir `assets/og-image.png` (placeholder) por imagen real 1200×630 con el wordmark sobre `#fdf8f0`.
+- [ ] Sustituir `assets/og-image.png` (placeholder) por imagen real 1200×630 con el wordmark sobre `#f3f5ee`.
 - [ ] Verificar que `Cualificado · 90 h MAPA` en la ficha técnica del piloto (bajo el SVG hero) es exacto. Si no, generalizar a `Cualificado · ROPO + RPAS`.
 - [ ] Verificar `Mínimo operativo de jornada 500 €` en §005 Tarifa.
 - [ ] Añadir `sitemap.xml` + `robots.txt`.

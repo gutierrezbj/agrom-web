@@ -16,7 +16,7 @@
 <meta name="twitter:card" content="summary_large_image">
 
 <!-- Favicon (inline SVG, monograma "M" italic sobre verde primary) -->
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%2346632e'/><circle cx='16' cy='3' r='2' fill='%23d45220'/><text x='16' y='24' font-family='Georgia,serif' font-size='22' font-style='italic' fill='%23fdf8f0' text-anchor='middle'>M</text></svg>">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%2346632e'/><circle cx='16' cy='3' r='2' fill='%23d45220'/><text x='16' y='24' font-family='Georgia,serif' font-size='22' font-style='italic' fill='%23f3f5ee' text-anchor='middle'>M</text></svg>">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -36,7 +36,7 @@
           // Tokens v2 canónicos (FitoLink heredado)
           primary:         '#46632e',
           'primary-dark':  '#354b23',
-          surface:         '#fdf8f0',
+          surface:         '#f3f5ee',
           'surface-elevated': '#f5e6cc',
           'border-token':  '#d4a85a',  // 'border' chocaría con utility Tailwind
           'text-strong':   '#18230f',
@@ -47,7 +47,7 @@
           'accent-danger': '#b91c1c',
           'accent-info':   '#64748b',
           // Aliases legacy v1 → apuntan a los nuevos hex (no romper bg-paper, text-ink, etc.)
-          paper:   '#fdf8f0',
+          paper:   '#f3f5ee',
           parch:   '#f5e6cc',
           deep:    '#46632e',
           mid:     '#354b23',
@@ -65,7 +65,7 @@
   :root {
     /* Tokens v2 canónicos (FitoLink heredado) */
     --primary:#46632e; --primary-dark:#354b23;
-    --surface:#fdf8f0; --surface-elevated:#f5e6cc;
+    --surface:#f3f5ee; --surface-elevated:#f5e6cc;
     --border:#d4a85a; --text-strong:#18230f; --text-soft:#6b7280;
     --brand-accent:#d45220;
     /* Semánticos */
@@ -145,7 +145,7 @@
   .nav-blur {
     backdrop-filter: blur(16px) saturate(140%);
     -webkit-backdrop-filter: blur(16px) saturate(140%);
-    background: rgba(253,248,240,0.78);
+    background: rgba(243,245,238,0.78);
   }
 
   /* Drop cap — Instrument Serif, italic para mantener carácter editorial sin pesos */
@@ -448,7 +448,7 @@
     width: 6px; height: 6px; border-radius: 50%;
     background: var(--terra);
   }
-  .tag-chip .lbl { color: rgba(253,248,240,0.55); }
+  .tag-chip .lbl { color: rgba(243,245,238,0.55); }
   .tag-chip .val { color: var(--paper); font-weight: 500; }
   .tag-chip.t1 { top: 6%;  left: 6%;  animation-delay: 1.2s; }
   @keyframes tag-in {
@@ -863,7 +863,7 @@
 
       <div class="grid grid-cols-12 gap-6 md:gap-10">
         <div class="col-span-12 md:col-span-4 flex items-baseline gap-6 mb-10 in-view">
-          <span class="side-numeral" style="color: rgba(253,248,240,0.55);">§ 005</span>
+          <span class="side-numeral" style="color: rgba(243,245,238,0.55);">§ 005</span>
           <span class="eyebrow" style="color: var(--terra);">Tarifa</span>
         </div>
 
