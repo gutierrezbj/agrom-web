@@ -1,0 +1,31 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+npm-debug.log*
+
+# Env (nunca commitear secretos)
+.env
+.env.*
+!.env.example
+
+# Dependencias / build (no aplica a esta landing, pero por si añadimos build en el futuro)
+node_modules/
+dist/
+build/
+.cache/
+
+# Vercel
+.vercel/

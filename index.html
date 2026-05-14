@@ -1,0 +1,1143 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AgroM — Aplicación aérea agrícola con trabajo documentado</title>
+<meta name="description" content="Servicio de aplicación aérea con DJI Agras T50 bajo paraguas operacional Drovinci. Piloto cualificado, verificación meteorológica previa al vuelo y albarán firmado en finca. Desde 35 €/ha en España." />
+
+<!-- Open Graph -->
+<meta property="og:title" content="AgroM — Aplicación aérea agrícola con trabajo documentado">
+<meta property="og:description" content="DJI Agras T50, NPTA Drovinci, albarán firmado en finca. Desde 35 €/ha.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://agrom.es">
+<meta property="og:image" content="https://agrom.es/assets/og-image.png">
+<meta property="og:locale" content="es_ES">
+<meta name="twitter:card" content="summary_large_image">
+
+<!-- Favicon (inline SVG, monograma "M" italic sobre verde primary) -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%2346632e'/><circle cx='16' cy='3' r='2' fill='%23d45220'/><text x='16' y='24' font-family='Georgia,serif' font-size='22' font-style='italic' fill='%23fdf8f0' text-anchor='middle'>M</text></svg>">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,300..700&family=IBM+Plex+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          display: ['"Instrument Serif"', 'Georgia', 'serif'],
+          sans: ['"DM Sans"', 'system-ui', 'sans-serif'],
+          mono: ['"IBM Plex Mono"', 'ui-monospace', 'monospace'],
+        },
+        colors: {
+          // Tokens v2 canónicos (FitoLink heredado)
+          primary:         '#46632e',
+          'primary-dark':  '#354b23',
+          surface:         '#fdf8f0',
+          'surface-elevated': '#f5e6cc',
+          'border-token':  '#d4a85a',  // 'border' chocaría con utility Tailwind
+          'text-strong':   '#18230f',
+          'text-soft':     '#6b7280',
+          'brand-accent':  '#d45220',
+          'accent-ok':     '#15803d',
+          'accent-warn':   '#c49032',
+          'accent-danger': '#b91c1c',
+          'accent-info':   '#64748b',
+          // Aliases legacy v1 → apuntan a los nuevos hex (no romper bg-paper, text-ink, etc.)
+          paper:   '#fdf8f0',
+          parch:   '#f5e6cc',
+          deep:    '#46632e',
+          mid:     '#354b23',
+          terra:   '#d45220',
+          ink:     '#18230f',
+          rule:    '#d4a85a',
+          muted:   '#6b7280',
+        },
+      },
+    },
+  }
+</script>
+
+<style>
+  :root {
+    /* Tokens v2 canónicos (FitoLink heredado) */
+    --primary:#46632e; --primary-dark:#354b23;
+    --surface:#fdf8f0; --surface-elevated:#f5e6cc;
+    --border:#d4a85a; --text-strong:#18230f; --text-soft:#6b7280;
+    --brand-accent:#d45220;
+    /* Semánticos */
+    --accent-ok:#15803d; --accent-warn:#c49032;
+    --accent-danger:#b91c1c; --accent-info:#64748b;
+    /* Radii */
+    --radius-base:4px; --radius-lg:6px; --radius-pill:9999px;
+    /* Shadows recolorizadas con rgba(24,35,15,…) del nuevo --text-strong */
+    --shadow-sm: 0 1px 2px rgba(24,35,15,0.06);
+    --shadow-md: 0 4px 12px rgba(24,35,15,0.08);
+    --shadow-lg: 0 30px 60px -30px rgba(24,35,15,0.25);
+    /* Aliases legacy v1 — mismas claves, valores nuevos. Cualquier var(--paper) etc. apunta a v2. */
+    --paper:var(--surface); --parch:var(--surface-elevated);
+    --deep:var(--primary); --mid:var(--primary-dark);
+    --terra:var(--brand-accent); --ink:var(--text-strong);
+    --rule:var(--border); --muted:var(--text-soft);
+  }
+
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--surface);
+    color: var(--text-strong);
+    font-family: 'DM Sans', system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Grain overlay — subtle paper texture */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='3'/><feColorMatrix values='0 0 0 0 0.06 0 0 0 0 0.16 0 0 0 0 0.13 0 0 0 0.5 0'/></filter><rect width='200' height='200' filter='url(%23n)' opacity='0.35'/></svg>");
+    mix-blend-mode: multiply;
+    opacity: .12;
+    z-index: 1;
+  }
+
+  /* Anything that should sit above grain */
+  main, header, footer { position: relative; z-index: 2; }
+
+  /* Display type — Instrument Serif (Regular 400 + Italic 400, no variable) */
+  .font-display { font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; }
+  .display-tight { /* Instrument Serif no es variable — no-op para legacy */ }
+  .h-massive {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-weight: 400;
+    letter-spacing: -0.015em;
+    line-height: 1.05;
+  }
+  .h-big {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-weight: 400;
+    letter-spacing: -0.015em;
+    line-height: 1.18;
+  }
+  .eyebrow {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--primary);
+    font-weight: 500;
+  }
+  .body-lg {
+    font-size: 1.125rem;
+    line-height: 1.55;
+    color: var(--text-strong);
+  }
+
+  /* Hairlines */
+  .rule-top { border-top: 1px solid var(--rule); }
+  .rule-bot { border-bottom: 1px solid var(--rule); }
+
+  /* Sticky header */
+  .nav-blur {
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    background: rgba(253,248,240,0.78);
+  }
+
+  /* Drop cap — Instrument Serif, italic para mantener carácter editorial sin pesos */
+  .drop-cap::first-letter {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-weight: 400;
+    font-style: italic;
+    font-size: 4.4em;
+    line-height: 0.85;
+    float: left;
+    margin: 0.06em 0.08em 0 -0.04em;
+    color: var(--primary);
+  }
+
+  /* Hero reveal animation */
+  .reveal {
+    opacity: 0; transform: translateY(14px);
+    animation: rise 0.95s cubic-bezier(.2,.7,.2,1) forwards;
+  }
+  .reveal.d1 { animation-delay: .1s; }
+  .reveal.d2 { animation-delay: .25s; }
+  .reveal.d3 { animation-delay: .40s; }
+  .reveal.d4 { animation-delay: .55s; }
+  .reveal.d5 { animation-delay: .70s; }
+  @keyframes rise {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Scroll-in reveal (set up via JS observer) */
+  .in-view {
+    opacity: 0; transform: translateY(20px);
+    transition: opacity .8s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1);
+  }
+  .in-view.visible { opacity: 1; transform: none; }
+
+  /* Hero ambient pattern — subtle field lines */
+  .field-bg {
+    background-image:
+      linear-gradient(to bottom, transparent 0%, transparent 92%, rgba(212,168,90,0.18) 92%, rgba(212,168,90,0.18) calc(92% + 1px), transparent calc(92% + 1px)),
+      repeating-linear-gradient(180deg, transparent 0 12px, rgba(70,99,46,0.025) 12px 13px);
+  }
+
+  /* Process card line marker */
+  .step-num {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-weight: 400;
+    font-size: 5.5rem;
+    line-height: 0.9;
+    color: var(--brand-accent);
+  }
+
+  /* Big stat number */
+  .stat-num {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-weight: 400;
+    font-size: clamp(3.5rem, 8vw, 7rem);
+    line-height: 0.88;
+    letter-spacing: -0.015em;
+    color: var(--primary);
+  }
+  .stat-num em {
+    font-style: italic;
+    color: var(--brand-accent);
+  }
+  /* Variante para columnas que muestran texto (no número) en stat-num — encaja sin desbordar */
+  .stat-num.stat-text {
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    line-height: 1.05;
+    letter-spacing: -0.005em;
+  }
+
+  /* CTA button */
+  .btn-primary {
+    background: var(--deep);
+    color: var(--paper);
+    padding: 0.95rem 1.5rem;
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    transition: transform .25s, background .25s;
+    text-decoration: none;
+  }
+  .btn-primary:hover { background: var(--ink); transform: translateY(-1px); }
+  .btn-primary::after {
+    content: '→';
+    transition: transform .25s;
+  }
+  .btn-primary:hover::after { transform: translateX(4px); }
+
+  .btn-ghost {
+    color: var(--ink);
+    padding: 0.95rem 0.2rem;
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-weight: 500;
+    border-bottom: 1px solid var(--ink);
+    text-decoration: none;
+    transition: color .25s, border-color .25s;
+  }
+  .btn-ghost:hover { color: var(--terra); border-color: var(--terra); }
+
+  /* Footer brand mark dot */
+  .brand-dot {
+    width: 0.7em; height: 0.7em;
+    background: var(--terra);
+    border-radius: 50%;
+    display: inline-block;
+    vertical-align: middle;
+    margin-bottom: 0.25em;
+  }
+
+  /* Side numeral (editorial section labels) */
+  .side-numeral {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+  }
+
+  /* Highlight underline on terra */
+  .ink-highlight {
+    background: linear-gradient(transparent 62%, rgba(212,82,32,0.28) 62%);
+    padding: 0 0.05em;
+  }
+
+  /* Hero word entrance — single animation, no nesting conflicts */
+  .hero-line {
+    display: block;
+    opacity: 0;
+    transform: translateY(28px);
+    animation: hero-rise 0.95s cubic-bezier(.2,.7,.2,1) forwards;
+  }
+  .hero-line.d1 { animation-delay: .10s; }
+  .hero-line.d2 { animation-delay: .25s; }
+  .hero-line.d3 { animation-delay: .55s; }
+  @keyframes hero-rise {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Logo monogram for sticky header — italic "M" sobre verde primary */
+  .mark-mini {
+    display: inline-block; width: 2.2rem; height: 2.2rem;
+    background: var(--primary); color: var(--surface);
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-weight: 400; font-style: italic;
+    border-radius: 5px;
+    text-align: center; line-height: 2.2rem; font-size: 1.4rem;
+    position: relative;
+  }
+  .mark-mini::before {
+    content: ''; position: absolute;
+    top: -4px; left: 50%; transform: translateX(-50%);
+    width: 6px; height: 6px;
+    background: var(--brand-accent);
+    border-radius: 50%;
+  }
+
+  /* Process step rule */
+  .step-rule {
+    background: linear-gradient(90deg, var(--rule) 0%, var(--rule) 30%, transparent 100%);
+    height: 1px;
+  }
+
+  /* Quote in trazabilidad section — Instrument Serif italic */
+  .pull-quote {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-weight: 400;
+    font-style: italic;
+    font-size: clamp(1.6rem, 3vw, 2.4rem);
+    line-height: 1.18;
+    color: var(--text-strong);
+    letter-spacing: -0.015em;
+  }
+
+  /* Tiny check icon */
+  .check {
+    display: inline-block;
+    width: 1.05rem; height: 1.05rem;
+    flex-shrink: 0;
+    color: var(--deep);
+  }
+
+  /* Footer dark */
+  .footer-dark {
+    background: var(--ink);
+    color: var(--parch);
+  }
+  .footer-dark a { color: var(--parch); }
+  .footer-dark a:hover { color: var(--terra); }
+
+  /* ───── Parcela dashboard visual ───── */
+  .parcela-frame {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    width: 100%;
+    background: linear-gradient(135deg, #f5e6cc 0%, #e8d4a8 100%);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    overflow: hidden;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.5) inset,
+      0 30px 60px -30px rgba(24,35,15,0.25);
+  }
+  .parcela-frame::before {
+    /* grid overlay — coordinate map feel */
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(70,99,46,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(70,99,46,0.06) 1px, transparent 1px);
+    background-size: 28px 28px;
+    pointer-events: none;
+  }
+  .parcela-frame::after {
+    /* corner crops, like a screen reticle */
+    content: '';
+    position: absolute; inset: 14px;
+    border: 1px solid rgba(70,99,46,0.18);
+    pointer-events: none;
+    border-radius: 1px;
+  }
+  .parcela-svg { display: block; width: 100%; height: 100%; }
+
+  /* Trace path animation (the drone's flight) */
+  .flight-trace {
+    stroke: var(--ink);
+    stroke-width: 2;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 1400;
+    stroke-dashoffset: 1400;
+    animation: trace-draw 4.5s cubic-bezier(.4,.0,.2,1) 0.8s forwards;
+    opacity: 0.85;
+  }
+  @keyframes trace-draw {
+    to { stroke-dashoffset: 0; }
+  }
+
+  /* Drone marker traveling along the path */
+  .drone-marker {
+    fill: var(--terra);
+    transform-origin: center;
+    animation: drone-pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes drone-pulse {
+    0%, 100% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(212,82,32,0.6)); }
+    50% { transform: scale(1.15); filter: drop-shadow(0 0 6px rgba(212,82,32,0.7)); }
+  }
+  .drone-halo {
+    fill: var(--terra);
+    opacity: 0.18;
+    transform-origin: center;
+    animation: halo-ping 2.4s ease-out infinite;
+  }
+  @keyframes halo-ping {
+    0% { transform: scale(1); opacity: 0.35; }
+    100% { transform: scale(2.8); opacity: 0; }
+  }
+
+  /* Parcela polygon — irregular SIGPAC */
+  .parcela-poly {
+    fill: rgba(70,99,46,0.10);
+    stroke: var(--deep);
+    stroke-width: 1.5;
+    stroke-dasharray: 4 3;
+  }
+
+  /* Crop rows (subtle texture inside the parcela) */
+  .crop-rows {
+    stroke: rgba(70,99,46,0.18);
+    stroke-width: 0.8;
+  }
+
+  /* Floating tag chips */
+  .tag-chip {
+    position: absolute;
+    background: rgba(24,35,15,0.92);
+    color: var(--paper);
+    padding: 0.45rem 0.65rem;
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    display: flex; align-items: center; gap: 0.5rem;
+    border-radius: 2px;
+    backdrop-filter: blur(8px);
+    opacity: 0;
+    animation: tag-in 0.6s cubic-bezier(.2,.7,.2,1) forwards;
+    white-space: nowrap;
+  }
+  .tag-chip .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--terra);
+  }
+  .tag-chip .lbl { color: rgba(253,248,240,0.55); }
+  .tag-chip .val { color: var(--paper); font-weight: 500; }
+  .tag-chip.t1 { top: 6%;  left: 6%;  animation-delay: 1.2s; }
+  @keyframes tag-in {
+    from { opacity: 0; transform: translateY(6px) scale(0.95); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* Compass + scale watermark inside frame */
+  .frame-meta {
+    position: absolute;
+    bottom: 14px; left: 14px;
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    color: rgba(24,35,15,0.45);
+    text-transform: uppercase;
+    pointer-events: none;
+  }
+  .frame-meta-right {
+    position: absolute;
+    bottom: 14px; right: 14px;
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.12em;
+    color: rgba(24,35,15,0.45);
+    text-transform: uppercase;
+    pointer-events: none;
+  }
+
+  /* Mobile nav adjustments */
+  @media (max-width: 768px) {
+    .nav-links { display: none; }
+    .parcela-frame { aspect-ratio: 1 / 1; margin-top: 2rem; }
+    .tag-chip { font-size: 0.55rem; padding: 0.35rem 0.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ───────────────────────────── HEADER ─────────────────────────────── -->
+<header class="sticky top-0 z-50 nav-blur rule-bot">
+  <div class="max-w-[1280px] mx-auto px-6 md:px-10 h-20 flex items-center justify-between">
+    <a href="#top" class="flex items-center gap-4" aria-label="AgroM home">
+      <span class="mark-mini">M</span>
+      <span class="font-display text-[1.9rem] tracking-tight text-ink leading-none">
+        <span style="font-weight:400;">Agro</span><span style="font-weight:400; font-style:italic;">M</span>
+      </span>
+    </a>
+    <nav class="nav-links flex items-center gap-8 text-sm">
+      <a href="#servicio" class="text-ink/80 hover:text-terra transition">Servicio</a>
+      <a href="#proceso"  class="text-ink/80 hover:text-terra transition">Cómo trabajamos</a>
+      <a href="#trazabilidad" class="text-ink/80 hover:text-terra transition">Trazabilidad</a>
+      <a href="#tarifa"   class="text-ink/80 hover:text-terra transition">Tarifa</a>
+      <a href="#contacto" class="text-ink/80 hover:text-terra transition">Contacto</a>
+    </nav>
+    <a href="#contacto" class="btn-primary" style="padding: 0.65rem 1.1rem; font-size: 0.72rem;">
+      Pedir presupuesto
+    </a>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- ─────────────────────────── HERO ─────────────────────────── -->
+  <section class="field-bg pt-16 md:pt-20 pb-20 md:pb-28 px-6 md:px-10">
+    <div class="max-w-[1280px] mx-auto">
+      <div class="grid grid-cols-12 gap-6 md:gap-10 items-start">
+
+        <!-- LEFT: eyebrow + headline + subline + CTAs -->
+        <div class="col-span-12 lg:col-span-7">
+
+          <!-- Eyebrow with numeral -->
+          <div class="flex items-baseline gap-6 hero-line d1">
+            <span class="side-numeral">§ 001</span>
+            <span class="eyebrow">Aplicación aérea agrícola · España</span>
+          </div>
+
+          <!-- Headline -->
+          <h1 class="mt-6 md:mt-8 h-massive text-[clamp(2.8rem,7.2vw,6.6rem)]">
+            <span class="hero-line d1">El campo</span>
+            <span class="hero-line d2">se trata desde arriba.</span>
+            <span class="hero-line d3" style="color:var(--brand-accent); font-style:italic; display:block;">Y se demuestra.</span>
+          </h1>
+
+          <!-- Subline + CTAs -->
+          <div class="mt-10 hero-line d3">
+            <p class="body-lg max-w-xl text-ink/85">
+              Servicio de aplicación con <span class="font-mono text-sm bg-parch px-1.5 py-0.5 rounded">DJI Agras T50</span> bajo paraguas operacional Drovinci.
+              Piloto cualificado, verificación meteorológica previa al vuelo y albarán firmado en finca por el agricultor.
+            </p>
+            <div class="mt-8 flex flex-wrap items-center gap-6">
+              <a href="#contacto" class="btn-primary">Pedir presupuesto</a>
+              <a href="#proceso" class="btn-ghost">Cómo trabajamos</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Parcela dashboard visual -->
+        <div class="col-span-12 lg:col-span-5 mt-10 lg:mt-0 hero-line d3">
+          <div class="parcela-frame">
+
+            <!-- The SVG: parcela polygon + crop rows + flight trace + drone -->
+            <svg class="parcela-svg" viewBox="0 0 400 500" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+              <!-- Crop row texture (diagonal subtle stripes inside parcela) -->
+              <defs>
+                <pattern id="crop-pattern" x="0" y="0" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(18)">
+                  <line x1="0" y1="0" x2="0" y2="6" class="crop-rows"/>
+                </pattern>
+                <clipPath id="parcela-clip">
+                  <!-- Irregular SIGPAC polygon -->
+                  <polygon points="60,80 320,55 360,180 345,320 290,420 200,440 80,395 50,250 70,150"/>
+                </clipPath>
+              </defs>
+
+              <!-- Parcela polygon fill -->
+              <polygon class="parcela-poly" points="60,80 320,55 360,180 345,320 290,420 200,440 80,395 50,250 70,150"/>
+
+              <!-- Crop rows clipped to parcela -->
+              <rect x="0" y="0" width="400" height="500" fill="url(#crop-pattern)" clip-path="url(#parcela-clip)"/>
+
+              <!-- Secondary smaller adjacent parcela (top right) for editorial depth -->
+              <polygon
+                fill="rgba(70,99,46,0.05)"
+                stroke="rgba(70,99,46,0.35)"
+                stroke-width="1"
+                stroke-dasharray="3 3"
+                points="325,55 392,68 390,165 360,178"/>
+
+              <!-- Path corners labels (cadastral feel) -->
+              <g fill="rgba(24,35,15,0.45)" font-family="IBM Plex Mono, monospace" font-size="7" letter-spacing="0.5">
+                <text x="50" y="74">A</text>
+                <text x="326" y="49">B</text>
+                <text x="366" y="180">C</text>
+                <text x="352" y="320">D</text>
+                <text x="296" y="430">E</text>
+                <text x="202" y="453">F</text>
+                <text x="68" y="402">G</text>
+                <text x="38" y="252">H</text>
+                <text x="58" y="146">I</text>
+              </g>
+
+              <!-- The flight trace: boustrophedon serpentine over the parcela -->
+              <path class="flight-trace" d="
+                M 90 130
+                L 320 110
+                L 325 165
+                L 85 185
+                L 90 240
+                L 340 220
+                L 345 275
+                L 80 295
+                L 85 350
+                L 310 330
+              "/>
+
+              <!-- Drone marker at the end of the trace -->
+              <g transform="translate(310, 330)">
+                <circle class="drone-halo" cx="0" cy="0" r="8"/>
+                <circle class="drone-marker" cx="0" cy="0" r="6"/>
+              </g>
+
+              <!-- Compass rose top-right inside frame -->
+              <g transform="translate(370, 30)" opacity="0.5">
+                <circle cx="0" cy="0" r="11" fill="none" stroke="var(--ink)" stroke-width="0.6"/>
+                <line x1="0" y1="-9" x2="0" y2="9" stroke="var(--ink)" stroke-width="0.5"/>
+                <line x1="-9" y1="0" x2="9" y2="0" stroke="var(--ink)" stroke-width="0.5"/>
+                <polygon points="0,-9 -3,-3 0,-5 3,-3" fill="var(--terra)"/>
+                <text x="-2.5" y="-14" font-family="IBM Plex Mono, monospace" font-size="6" fill="var(--ink)">N</text>
+              </g>
+            </svg>
+
+            <!-- Floating tag chip — identificación de parcela -->
+            <div class="tag-chip t1">
+              <span class="dot"></span><span class="lbl">Parcela</span><span class="val">14,3 ha</span>
+            </div>
+
+            <!-- Frame meta corners -->
+            <div class="frame-meta">SIGPAC · 45/063/12/4·R3</div>
+            <div class="frame-meta-right">EPSG:25830</div>
+          </div>
+
+          <!-- Compact ficha técnica below the visual (replaces the right aside) -->
+          <div class="mt-6 grid grid-cols-3 gap-3 text-xs">
+            <div class="border-t border-rule pt-2">
+              <div class="text-muted font-mono uppercase tracking-wider text-[0.6rem]">Aeronave</div>
+              <div class="text-ink font-medium mt-1">DJI Agras T50</div>
+            </div>
+            <div class="border-t border-rule pt-2">
+              <div class="text-muted font-mono uppercase tracking-wider text-[0.6rem]">NPTA</div>
+              <div class="text-ink font-medium mt-1">Drovinci · AESA</div>
+            </div>
+            <div class="border-t border-rule pt-2">
+              <div class="text-muted font-mono uppercase tracking-wider text-[0.6rem]">Piloto</div>
+              <div class="text-ink font-medium mt-1">Cualificado · 90 h MAPA</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────── STATS STRIP ─────────────────── -->
+  <section class="bg-deep text-paper py-16 md:py-20 px-6 md:px-10 relative overflow-hidden">
+    <div class="max-w-[1280px] mx-auto">
+      <div class="grid grid-cols-12 gap-8 md:gap-10">
+        <div class="col-span-12 md:col-span-3 in-view">
+          <div class="stat-num" style="color: var(--paper);"><em>35</em> €</div>
+          <div class="mt-3 text-paper/70 text-sm font-mono uppercase tracking-wider">desde, por hectárea</div>
+        </div>
+        <div class="col-span-12 md:col-span-3 in-view">
+          <div class="stat-num" style="color: var(--paper);">30+</div>
+          <div class="mt-3 text-paper/70 text-sm font-mono uppercase tracking-wider">hectáreas / jornada</div>
+        </div>
+        <div class="col-span-12 md:col-span-3 in-view">
+          <div class="stat-num" style="color: var(--paper);"><em>NPTA</em></div>
+          <div class="mt-3 text-paper/70 text-sm font-mono uppercase tracking-wider">paraguas Drovinci</div>
+        </div>
+        <div class="col-span-12 md:col-span-3 in-view">
+          <div class="stat-num stat-text" style="color: var(--paper);">Aceptamos<br>emergencias</div>
+          <div class="mt-3 text-paper/70 text-sm font-mono uppercase tracking-wider">ventana 24–48 h</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────── SERVICIO ─────────────────── -->
+  <section id="servicio" class="py-24 md:py-32 px-6 md:px-10">
+    <div class="max-w-[1280px] mx-auto">
+      <div class="grid grid-cols-12 gap-6 md:gap-10">
+
+        <div class="col-span-12 md:col-span-4 flex items-baseline gap-6 in-view">
+          <span class="side-numeral">§ 002</span>
+          <span class="eyebrow">Qué hacemos</span>
+        </div>
+
+        <h2 class="col-span-12 md:col-span-8 h-big text-[clamp(2.4rem,5.5vw,4.6rem)] in-view">
+          Aplicación profesional <span style="font-style:italic; color:var(--brand-accent);">sin que toques</span> el producto
+        </h2>
+
+        <div class="col-span-12 md:col-span-7 md:col-start-2 mt-8 body-lg drop-cap in-view">
+          El agricultor o la cooperativa aportan el producto fitosanitario, biostimulante o foliar.
+          Nosotros aplicamos con un <em>DJI Agras T50</em> calibrado, dentro de la ventana meteorológica
+          verificada con AEMET, y dejamos constancia documental de cada aplicación: producto y dosis
+          aplicada, condiciones de la jornada y albarán firmado por el agricultor en finca.
+        </div>
+
+        <div class="col-span-12 md:col-span-3 md:col-start-10 mt-8 in-view">
+          <div class="bg-parch p-6 rule-top rule-bot">
+            <div class="eyebrow mb-3" style="color: var(--terra);">Importante</div>
+            <p class="text-sm text-ink leading-relaxed">
+              AgroM <strong>no comercializa</strong> producto fitosanitario.
+              Aplicamos lo que el cliente aporta, con trazabilidad completa de lote y caducidad.
+              Operación bajo <strong>RD 1311/2012</strong>.
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────── PROCESO ─────────────────── -->
+  <section id="proceso" class="bg-parch py-24 md:py-32 px-6 md:px-10 relative">
+    <div class="max-w-[1280px] mx-auto">
+
+      <div class="grid grid-cols-12 gap-6 md:gap-10 mb-16">
+        <div class="col-span-12 md:col-span-4 flex items-baseline gap-6 in-view">
+          <span class="side-numeral">§ 003</span>
+          <span class="eyebrow">Proceso</span>
+        </div>
+        <h2 class="col-span-12 md:col-span-8 h-big text-[clamp(2.4rem,5.5vw,4.6rem)] in-view">
+          Cuatro pasos. Sin sorpresas.
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-12 gap-6 md:gap-10">
+
+        <!-- Step 1 -->
+        <article class="col-span-12 md:col-span-6 lg:col-span-3 in-view">
+          <div class="step-num">01</div>
+          <div class="step-rule mt-4 mb-5"></div>
+          <h3 class="font-display text-2xl text-ink mb-3">Contacto y presupuesto</h3>
+          <p class="text-sm text-ink/80 leading-relaxed">
+            Visita o llamada. Definimos parcela, cultivo y ventana objetivo. Presupuesto cerrado
+            por hectárea, sin sorpresas.
+          </p>
+        </article>
+
+        <!-- Step 2 -->
+        <article class="col-span-12 md:col-span-6 lg:col-span-3 in-view">
+          <div class="step-num">02</div>
+          <div class="step-rule mt-4 mb-5"></div>
+          <h3 class="font-display text-2xl text-ink mb-3">Planificación</h3>
+          <p class="text-sm text-ink/80 leading-relaxed">
+            Parcela SIGPAC, dosis y volumen de caldo. Verificamos ventana meteo con AEMET y
+            reservamos jornada del T50.
+          </p>
+        </article>
+
+        <!-- Step 3 -->
+        <article class="col-span-12 md:col-span-6 lg:col-span-3 in-view">
+          <div class="step-num">03</div>
+          <div class="step-rule mt-4 mb-5"></div>
+          <h3 class="font-display text-2xl text-ink mb-3">Aplicación</h3>
+          <p class="text-sm text-ink/80 leading-relaxed">
+            Piloto cualificado vuela el T50 bajo NPTA Drovinci. Carga, mezcla y aplicación bajo
+            supervisión del aplicador certificado. Tú aportas el producto, nosotros el trabajo.
+          </p>
+        </article>
+
+        <!-- Step 4 -->
+        <article class="col-span-12 md:col-span-6 lg:col-span-3 in-view">
+          <div class="step-num">04</div>
+          <div class="step-rule mt-4 mb-5"></div>
+          <h3 class="font-display text-2xl text-ink mb-3">Albarán y cierre</h3>
+          <p class="text-sm text-ink/80 leading-relaxed">
+            Albarán firmado en finca por el agricultor con producto, lote, dosis y condiciones
+            de la jornada. Parte de trabajo archivado y a disposición durante 1 año.
+          </p>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────── TRAZABILIDAD ─────────────────── -->
+  <section id="trazabilidad" class="py-24 md:py-32 px-6 md:px-10">
+    <div class="max-w-[1280px] mx-auto">
+
+      <div class="grid grid-cols-12 gap-6 md:gap-10">
+
+        <div class="col-span-12 md:col-span-5 in-view">
+          <div class="flex items-baseline gap-6 mb-8">
+            <span class="side-numeral">§ 004</span>
+            <span class="eyebrow">Trazabilidad</span>
+          </div>
+
+          <h2 class="h-big text-[clamp(2.4rem,5vw,4.2rem)] mb-8">
+            Cada vuelo deja <span class="ink-highlight">huella</span>.
+          </h2>
+
+          <p class="body-lg text-ink/85 mb-8">
+            La aplicación aérea tradicional termina cuando aterriza el dron. La nuestra empieza ahí:
+            convertimos cada operación en documentación a la que puedes volver.
+          </p>
+
+          <blockquote class="pull-quote border-l-2 border-terra pl-6 my-10">
+            «No vendemos vuelos. Vendemos trabajo documentado.»
+          </blockquote>
+
+          <a href="#contacto" class="btn-ghost">Solicitar presupuesto</a>
+        </div>
+
+        <div class="col-span-12 md:col-span-6 md:col-start-7 in-view">
+          <div class="rule-top rule-bot py-8">
+            <div class="eyebrow mb-6">Cada operación incluye</div>
+            <ul class="space-y-5">
+              <li class="flex items-start gap-4 pb-5 rule-bot">
+                <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12l5 5L19 7"/></svg>
+                <div>
+                  <div class="font-medium text-ink">Parcela SIGPAC y superficie tratada</div>
+                  <div class="text-sm text-muted mt-1">Referencia catastral y hectáreas reales aplicadas.</div>
+                </div>
+              </li>
+              <li class="flex items-start gap-4 pb-5 rule-bot">
+                <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12l5 5L19 7"/></svg>
+                <div>
+                  <div class="font-medium text-ink">Producto aplicado, lote y caducidad</div>
+                  <div class="text-sm text-muted mt-1">Trazabilidad RD 1311/2012 sin trampas.</div>
+                </div>
+              </li>
+              <li class="flex items-start gap-4 pb-5 rule-bot">
+                <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12l5 5L19 7"/></svg>
+                <div>
+                  <div class="font-medium text-ink">Dosis y volumen de caldo</div>
+                  <div class="text-sm text-muted mt-1">Lo aportado por el cliente, lo aplicado por nosotros.</div>
+                </div>
+              </li>
+              <li class="flex items-start gap-4 pb-5 rule-bot">
+                <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12l5 5L19 7"/></svg>
+                <div>
+                  <div class="font-medium text-ink">Condiciones de la jornada</div>
+                  <div class="text-sm text-muted mt-1">Meteo verificada con AEMET antes del vuelo.</div>
+                </div>
+              </li>
+              <li class="flex items-start gap-4 pb-5 rule-bot">
+                <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12l5 5L19 7"/></svg>
+                <div>
+                  <div class="font-medium text-ink">Firma del agricultor en finca</div>
+                  <div class="text-sm text-muted mt-1">Conformidad en el sitio, en el albarán.</div>
+                </div>
+              </li>
+              <li class="flex items-start gap-4">
+                <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12l5 5L19 7"/></svg>
+                <div>
+                  <div class="font-medium text-ink">Parte de trabajo archivado 1 año</div>
+                  <div class="text-sm text-muted mt-1">A disposición del agricultor para PAC, peritaciones y Agroseguro.</div>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────── TARIFA ─────────────────── -->
+  <section id="tarifa" class="bg-ink text-paper py-24 md:py-32 px-6 md:px-10 relative">
+    <div class="max-w-[1280px] mx-auto">
+
+      <div class="grid grid-cols-12 gap-6 md:gap-10">
+        <div class="col-span-12 md:col-span-4 flex items-baseline gap-6 mb-10 in-view">
+          <span class="side-numeral" style="color: rgba(253,248,240,0.55);">§ 005</span>
+          <span class="eyebrow" style="color: var(--terra);">Tarifa</span>
+        </div>
+
+        <h2 class="col-span-12 md:col-span-8 h-big text-[clamp(2.4rem,5.5vw,4.6rem)] text-paper in-view">
+          Desde <span style="color: var(--brand-accent); font-style: italic;">35&nbsp;€</span> por hectárea.
+        </h2>
+
+        <p class="col-span-12 md:col-span-7 md:col-start-2 mt-8 body-lg text-paper/85 in-view">
+          Tarifa cerrada por hectárea según cultivo y superficie. Mínimo operativo de jornada 500&nbsp;€.
+          Producto fitosanitario aportado por el cliente, IVA aparte.
+          Te enviamos el presupuesto desglosado en 24–48 h con el desplazamiento y opcionales.
+        </p>
+
+        <div class="col-span-12 mt-16 in-view">
+          <div class="grid grid-cols-12 gap-x-6 gap-y-3 text-sm border-t border-paper/15 pt-6">
+            <div class="col-span-12 md:col-span-3 font-mono uppercase text-xs tracking-wider text-paper/55">Cultivo</div>
+            <div class="col-span-4 md:col-span-3 font-mono uppercase text-xs tracking-wider text-paper/55 text-right">&lt; 5 ha</div>
+            <div class="col-span-4 md:col-span-3 font-mono uppercase text-xs tracking-wider text-paper/55 text-right">5 – 20 ha</div>
+            <div class="col-span-4 md:col-span-3 font-mono uppercase text-xs tracking-wider text-paper/55 text-right">&gt; 20 ha</div>
+
+            <div class="col-span-12 md:col-span-3 mt-3 pt-3 border-t border-paper/15 text-paper">Cereal, girasol, maíz</div>
+            <div class="col-span-4 md:col-span-3 mt-3 pt-3 border-t border-paper/15 text-right text-paper/85 font-mono">Mín. día</div>
+            <div class="col-span-4 md:col-span-3 mt-3 pt-3 border-t border-paper/15 text-right text-paper/85 font-mono">40 €/ha</div>
+            <div class="col-span-4 md:col-span-3 mt-3 pt-3 border-t border-paper/15 text-right text-paper/85 font-mono">35 €/ha</div>
+
+            <div class="col-span-12 md:col-span-3 mt-3 pt-3 border-t border-paper/15 text-paper">Olivar, almendro, pistacho</div>
+            <div class="col-span-4 md:col-span-3 mt-3 pt-3 border-t border-paper/15 text-right text-paper/85 font-mono">Mín. día</div>
+            <div class="col-span-4 md:col-span-3 mt-3 pt-3 border-t border-paper/15 text-right text-paper/85 font-mono">45 €/ha</div>
+            <div class="col-span-4 md:col-span-3 mt-3 pt-3 border-t border-paper/15 text-right text-paper/85 font-mono">40 €/ha</div>
+
+            <div class="col-span-12 md:col-span-3 mt-3 pt-3 border-t border-paper/15 text-paper">Viña</div>
+            <div class="col-span-4 md:col-span-3 mt-3 pt-3 border-t border-paper/15 text-right text-paper/85 font-mono">Mín. día</div>
+            <div class="col-span-4 md:col-span-3 mt-3 pt-3 border-t border-paper/15 text-right text-paper/85 font-mono">50 €/ha</div>
+            <div class="col-span-4 md:col-span-3 mt-3 pt-3 border-t border-paper/15 text-right text-paper/85 font-mono">45 €/ha</div>
+
+            <div class="col-span-12 md:col-span-3 mt-3 pt-3 border-t border-paper/15 text-paper">Frutal, hortícola, invernadero</div>
+            <div class="col-span-4 md:col-span-3 mt-3 pt-3 border-t border-paper/15 text-right text-paper/85 font-mono">Mín. día</div>
+            <div class="col-span-4 md:col-span-3 mt-3 pt-3 border-t border-paper/15 text-right text-paper/85 font-mono">50 €/ha</div>
+            <div class="col-span-4 md:col-span-3 mt-3 pt-3 border-t border-paper/15 text-right text-paper/85 font-mono">45 €/ha</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────── PARA QUIÉN ─────────────────── -->
+  <section class="py-24 md:py-32 px-6 md:px-10">
+    <div class="max-w-[1280px] mx-auto">
+
+      <div class="grid grid-cols-12 gap-6 md:gap-10 mb-16">
+        <div class="col-span-12 md:col-span-4 flex items-baseline gap-6 in-view">
+          <span class="side-numeral">§ 006</span>
+          <span class="eyebrow">Para quién</span>
+        </div>
+        <h2 class="col-span-12 md:col-span-8 h-big text-[clamp(2.4rem,5.5vw,4.6rem)] in-view">
+          Trabajamos con quien necesita <span style="font-style:italic; color:var(--brand-accent);">demostrar</span> el tratamiento.
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-12 gap-6 md:gap-10">
+        <article class="col-span-12 md:col-span-6 lg:col-span-3 rule-top pt-6 in-view">
+          <div class="eyebrow mb-4" style="color: var(--terra);">A</div>
+          <h3 class="font-display text-2xl text-ink mb-3">Cooperativas</h3>
+          <p class="text-sm text-ink/80 leading-relaxed">
+            Servicios para socios con facturación mensual consolidada y planificación de campaña.
+          </p>
+        </article>
+        <article class="col-span-12 md:col-span-6 lg:col-span-3 rule-top pt-6 in-view">
+          <div class="eyebrow mb-4" style="color: var(--terra);">B</div>
+          <h3 class="font-display text-2xl text-ink mb-3">ATRIAs y comunidades de regantes</h3>
+          <p class="text-sm text-ink/80 leading-relaxed">
+            Tratamientos colectivos con albarán por socio y documentación unificada para el cuaderno de campo.
+          </p>
+        </article>
+        <article class="col-span-12 md:col-span-6 lg:col-span-3 rule-top pt-6 in-view">
+          <div class="eyebrow mb-4" style="color: var(--terra);">C</div>
+          <h3 class="font-display text-2xl text-ink mb-3">Agricultores profesionales</h3>
+          <p class="text-sm text-ink/80 leading-relaxed">
+            Superficies desde 5 ha. Cultivos intensivos donde la precisión y la trazabilidad importan.
+          </p>
+        </article>
+        <article class="col-span-12 md:col-span-6 lg:col-span-3 rule-top pt-6 in-view">
+          <div class="eyebrow mb-4" style="color: var(--terra);">D</div>
+          <h3 class="font-display text-2xl text-ink mb-3">Peritos y aseguradoras</h3>
+          <p class="text-sm text-ink/80 leading-relaxed">
+            Documentación de la aplicación para tu expediente. Útil en procesos de Agroseguro y peritaciones de campaña.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────── CONTACTO ─────────────────── -->
+  <section id="contacto" class="bg-parch py-24 md:py-32 px-6 md:px-10 relative">
+    <div class="max-w-[1280px] mx-auto">
+
+      <div class="grid grid-cols-12 gap-6 md:gap-10">
+
+        <div class="col-span-12 md:col-span-5 in-view">
+          <div class="flex items-baseline gap-6 mb-8">
+            <span class="side-numeral">§ 007</span>
+            <span class="eyebrow">Contacto</span>
+          </div>
+          <h2 class="h-big text-[clamp(2.4rem,5vw,4.4rem)] mb-8">
+            Tu presupuesto en <span style="font-style:italic; color:var(--brand-accent);">24–48&nbsp;h</span>.
+          </h2>
+          <p class="body-lg text-ink/85 mb-10">
+            Cuéntanos qué cultivo, qué superficie y dónde está la parcela. Te enviamos presupuesto
+            cerrado, condiciones de aplicación y disponibilidad para la próxima ventana meteo.
+          </p>
+
+          <div class="space-y-5 text-sm">
+            <div class="flex justify-between rule-bot pb-3">
+              <span class="text-muted font-mono uppercase tracking-wider text-xs">Email</span>
+              <a href="mailto:johnj@agrom.es" class="text-ink font-medium hover:text-terra transition">johnj@agrom.es</a>
+            </div>
+            <div class="flex justify-between rule-bot pb-3">
+              <span class="text-muted font-mono uppercase tracking-wider text-xs">Teléfono</span>
+              <a href="tel:+34605498659" class="text-ink font-medium hover:text-terra transition">+34 605 498 659</a>
+            </div>
+            <div class="flex justify-between rule-bot pb-3">
+              <span class="text-muted font-mono uppercase tracking-wider text-xs">Base operativa</span>
+              <span class="text-ink font-medium">Madrid · Castilla</span>
+            </div>
+            <div class="flex justify-between rule-bot pb-3">
+              <span class="text-muted font-mono uppercase tracking-wider text-xs">Respuesta media</span>
+              <span class="text-ink font-medium">24–48 h</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-span-12 md:col-span-6 md:col-start-7 in-view">
+          <form id="contact-form" class="bg-paper p-8 md:p-10 rule-top">
+            <div class="eyebrow mb-6">Solicita presupuesto</div>
+
+            <div class="space-y-5">
+              <div>
+                <label for="f-nombre" class="block text-xs font-mono uppercase tracking-wider text-muted mb-2">Nombre o razón social</label>
+                <input id="f-nombre" name="nombre" type="text" required class="w-full bg-transparent border-b border-ink/20 pb-2 focus:outline-none focus:border-deep transition text-ink" placeholder="Cooperativa Agrícola del…" />
+              </div>
+              <div>
+                <label for="f-email" class="block text-xs font-mono uppercase tracking-wider text-muted mb-2">Email</label>
+                <input id="f-email" name="email" type="email" required class="w-full bg-transparent border-b border-ink/20 pb-2 focus:outline-none focus:border-deep transition text-ink" placeholder="contacto@…" />
+              </div>
+              <div>
+                <label for="f-telefono" class="block text-xs font-mono uppercase tracking-wider text-muted mb-2">Teléfono</label>
+                <input id="f-telefono" name="telefono" type="tel" class="w-full bg-transparent border-b border-ink/20 pb-2 focus:outline-none focus:border-deep transition text-ink" placeholder="+34…" />
+              </div>
+
+              <div class="grid grid-cols-2 gap-5">
+                <div>
+                  <label for="f-cultivo" class="block text-xs font-mono uppercase tracking-wider text-muted mb-2">Cultivo</label>
+                  <input id="f-cultivo" name="cultivo" type="text" class="w-full bg-transparent border-b border-ink/20 pb-2 focus:outline-none focus:border-deep transition text-ink" placeholder="Olivar, viña…" />
+                </div>
+                <div>
+                  <label for="f-hectareas" class="block text-xs font-mono uppercase tracking-wider text-muted mb-2">Hectáreas aprox.</label>
+                  <input id="f-hectareas" name="hectareas" type="number" class="w-full bg-transparent border-b border-ink/20 pb-2 focus:outline-none focus:border-deep transition text-ink" placeholder="12" />
+                </div>
+              </div>
+
+              <div>
+                <label for="f-ubicacion" class="block text-xs font-mono uppercase tracking-wider text-muted mb-2">Ubicación (provincia / municipio)</label>
+                <input id="f-ubicacion" name="ubicacion" type="text" class="w-full bg-transparent border-b border-ink/20 pb-2 focus:outline-none focus:border-deep transition text-ink" placeholder="Toledo, Mora" />
+              </div>
+
+              <div>
+                <label for="f-mensaje" class="block text-xs font-mono uppercase tracking-wider text-muted mb-2">Cuéntanos más (opcional)</label>
+                <textarea id="f-mensaje" name="mensaje" rows="3" class="w-full bg-transparent border-b border-ink/20 pb-2 focus:outline-none focus:border-deep transition text-ink resize-none" placeholder="Tipo de tratamiento, ventana objetivo…"></textarea>
+              </div>
+            </div>
+
+            <button type="submit" class="btn-primary mt-10 w-full justify-center">
+              Enviar solicitud
+            </button>
+
+            <p class="text-xs text-muted mt-4 leading-relaxed">
+              Al enviar, se abrirá tu cliente de correo con la solicitud lista para enviar a
+              <a href="mailto:johnj@agrom.es" class="underline">johnj@agrom.es</a>.
+              Si prefieres, escríbenos directamente. Tratamiento de datos según
+              <a href="legal.html" class="underline">aviso legal</a>. Conservación 12 meses · RGPD.
+            </p>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ─────────────────── FOOTER ─────────────────── -->
+<footer class="footer-dark py-16 px-6 md:px-10">
+  <div class="max-w-[1280px] mx-auto">
+    <div class="grid grid-cols-12 gap-6 md:gap-10 mb-12">
+      <div class="col-span-12 md:col-span-5">
+        <div class="font-display text-4xl md:text-5xl text-paper">
+          <span style="font-weight:400;">Agro</span><span style="font-weight:400; font-style:italic;">M</span><span class="brand-dot ml-1"></span>
+        </div>
+        <p class="text-sm text-paper/65 mt-4 max-w-xs leading-relaxed">
+          Servicios de aplicación aérea agrícola con trabajo documentado.
+          España · Operando desde 2026.
+        </p>
+      </div>
+
+      <div class="col-span-6 md:col-span-2">
+        <div class="text-xs font-mono uppercase tracking-wider text-paper/45 mb-4">Servicio</div>
+        <ul class="space-y-2 text-sm">
+          <li><a href="#servicio">Qué hacemos</a></li>
+          <li><a href="#proceso">Cómo trabajamos</a></li>
+          <li><a href="#trazabilidad">Trazabilidad</a></li>
+          <li><a href="#tarifa">Tarifa</a></li>
+        </ul>
+      </div>
+
+      <div class="col-span-6 md:col-span-2">
+        <div class="text-xs font-mono uppercase tracking-wider text-paper/45 mb-4">Legal</div>
+        <ul class="space-y-2 text-sm">
+          <li><a href="legal.html">Aviso legal</a></li>
+          <li><a href="legal.html#privacidad">Política de privacidad</a></li>
+          <li><a href="legal.html#cookies">Cookies</a></li>
+        </ul>
+      </div>
+
+      <div class="col-span-12 md:col-span-3">
+        <div class="text-xs font-mono uppercase tracking-wider text-paper/45 mb-4">Marco operativo</div>
+        <ul class="space-y-2 text-sm text-paper/80">
+          <li>NPTA AESA · Drovinci</li>
+          <li>ROPO Aplicador cualificado</li>
+          <li>RC aeronáutica vigente</li>
+          <li>RD 1311/2012 · PAC</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="rule-top pt-6 flex flex-col md:flex-row justify-between gap-4 text-xs text-paper/55 font-mono">
+      <span>© 2026 AgroM · Servicios de aplicación aérea</span>
+      <span>Hecho en España · Operando desde Castilla</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Scroll reveal observer
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+  document.querySelectorAll('.in-view').forEach(el => io.observe(el));
+
+  // Contact form → mailto handler (sin backend)
+  const cf = document.getElementById('contact-form');
+  if (cf) {
+    cf.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const v = (n) => (cf.querySelector(`[name="${n}"]`)?.value || '').trim();
+      const subject = encodeURIComponent(`Solicitud AgroM — ${v('nombre') || '(sin nombre)'}`);
+      const body = encodeURIComponent(
+        `Nombre/razón social: ${v('nombre')}\n` +
+        `Email: ${v('email')}\n` +
+        `Teléfono: ${v('telefono')}\n` +
+        `Cultivo: ${v('cultivo')}\n` +
+        `Hectáreas: ${v('hectareas')}\n` +
+        `Ubicación: ${v('ubicacion')}\n\n` +
+        `Mensaje:\n${v('mensaje')}\n`
+      );
+      window.location.href = `mailto:johnj@agrom.es?subject=${subject}&body=${body}`;
+    });
+  }
+</script>
+
+</body>
+</html>
