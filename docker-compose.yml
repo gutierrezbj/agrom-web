@@ -1,0 +1,28 @@
+# agrom-web — landing estática containerizada
+# Convención SRS: offset +180 (siguiente libre tras Vigía +150 / ARGOS +160 / AgroOps +170)
+# Patrón heredado: Vigía (nginx alpine + volumes raw)
+
+services:
+  agrom-web:
+    image: nginx:1.27-alpine
+    container_name: agrom-web
+    restart: unless-stopped
+    # ⚠️ SRS: bind SOLO a 127.0.0.1 — healthcheck.sh alerta si se expone a 0.0.0.0
+    ports:
+      - "127.0.0.1:3180:80"
+    volumes:
+      # La landing es HTML estático puro — sin build, se sirve tal cual el repo
+      - ./index.html:/usr/share/nginx/html/index.html:ro
+      - ./legal.html:/usr/share/nginx/html/legal.html:ro
+      - ./assets:/usr/share/nginx/html/assets:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    labels:
+      - "srs.project=agrom-web"
+      - "srs.offset=180"
+      - "srs.domain=agrom.es"

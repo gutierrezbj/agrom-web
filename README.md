@@ -28,30 +28,36 @@ O abrir directamente `index.html` en navegador (algunas funciones —favicon dat
 
 ```
 agrom-web/
-├── index.html         # landing v2 (página principal)
-├── legal.html         # aviso legal + privacidad + cookies (RGPD)
-├── README.md          # este archivo
-├── LICENSE            # All rights reserved
-├── .gitignore         # excluye .DS_Store, .vscode/, etc.
+├── index.html              # landing v2 (página principal)
+├── legal.html              # aviso legal + privacidad + cookies (RGPD)
+├── docker-compose.yml      # container nginx:alpine offset +180 (SRS)
+├── nginx.conf              # vhost interno del container
+├── DEPLOY.md               # receta SRS paso a paso (VPS + Certbot + healthcheck)
+├── README.md               # este archivo
+├── LICENSE                 # All rights reserved
+├── .gitignore              # excluye .DS_Store, .vscode/, etc.
 └── assets/
-    └── og-image.png   # 1200x630 para Open Graph (TODO v1.0 — placeholder)
+    └── og-image.png        # 1200x630 para Open Graph (TODO v1.0 — placeholder)
 ```
 
-Sin `package.json`. Sin Node. Sin build.
+Sin `package.json`. Sin Node. Sin build. El container monta los HTML/assets como volúmenes `:ro`.
 
-## Deploy
+## Deploy — convención SRS
 
-Recomendado: **Vercel**.
+Infraestructura propia: VPS Hostinger `72.62.41.234` + Nginx reverse-proxy + Docker compose + Certbot. Offset SRS asignado: **+180** (container expuesto en `127.0.0.1:3180`).
+
+Receta completa paso a paso en [DEPLOY.md](DEPLOY.md). Resumen:
 
 ```bash
-npm i -g vercel       # si no está instalado
-vercel                # vincula el repo, primer deploy en *.vercel.app
-# Vercel Dashboard → Settings → Domains → add "agrom.es"
-# Copiar A 76.76.21.21 al DNS Hostinger (raíz @) + CNAME www → cname.vercel-dns.com
-# HTTPS automático vía Let's Encrypt
+ssh root@72.62.41.234
+cd /opt/apps && git clone https://github.com/gutierrezbj/agrom-web.git
+cd agrom-web && docker compose up -d --build
+
+# Nginx vhost + Certbot (ver DEPLOY.md §3-4)
+# Registrar en /opt/scripts/healthcheck.sh (ver DEPLOY.md §5)
 ```
 
-Alternativas: GitHub Pages, Cloudflare Pages, VPS Hostinger.
+Antes del primer deploy: **registrar `agrom-web` en el Catálogo de Infraestructura SRS** (Notion) con offset +180 / 3180 / agrom.es.
 
 ## Reglas de copy (CRITICAL_no_inventar)
 
